@@ -20,3 +20,9 @@ Other Contributors: Justin Menchaca<br />
 - Statistics
 - Pandas
 - Matplotlib Pyplot
+
+## Usage
+
+1. Verify that all data is in csv format, follows the format of the existing data, and follows the naming convention `friction_[material]_[type]_[trial #].csv`, and is present in the `data/` directory
+
+2. Run `run.py` in the main directory using an IDE (preferrably spyder or vscode)
