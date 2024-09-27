@@ -30,7 +30,7 @@ def theta_between(A : np.ndarray(shape=(2,1)), B : np.ndarray(shape=(2,1))) -> f
 def theta_from_posx(A : np.ndarray(shape=(2,1))) -> float:
     """Takes a 2x1 unit vector and returns the internal angle in radians from the positive x-axis"""
     B = np.array([1, 0])
-    theta = theta_between(B, A)
+    theta = theta_between(A, B)
     return theta
 
 def rotate_cc(A : np.ndarray(shape=(2,1)), theta : float) -> np.ndarray(shape=(2,1)):
@@ -46,3 +46,4 @@ def rotate_cw(A : np.ndarray(shape=(2,1)), theta : float) -> np.ndarray(shape=(2
     theta_new = t - theta
     A_prime = rotate_cc(A, theta_new)
     return A_prime
+

@@ -1,1 +1,0 @@
-"""Organizes and formats the data for easier use"""
