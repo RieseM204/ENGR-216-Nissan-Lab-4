@@ -1,6 +1,6 @@
 import math
 import numpy as np
-import data_formatter as datform
+import lib.data_formatter as datform
 
 
 def distance(A : np.ndarray(shape=(2,1)), B : np.ndarray(shape=(2,1))) -> float:
@@ -9,8 +9,6 @@ def distance(A : np.ndarray(shape=(2,1)), B : np.ndarray(shape=(2,1))) -> float:
     C_dot = np.dot(C, C)
     r = math.sqrt(C_dot)
     return r
-
-
 
 def unit(v : np.ndarray(shape=(2,1))) -> np.ndarray(shape=(2,1)): 
     """Takes a 2x1 vector and converts it into a unit vector"""
@@ -52,12 +50,39 @@ def rotate(A, theta : float) -> np.ndarray(shape=(2,1)):
     return A_prime
 
 
-def normalise_minor(A : np.ndarray(2, 5), Base : np.ndarray(2,1)) -> np.ndarray(2, 5):
+
+def flip_and_align(positions : np.ndarray) -> np.ndarray:
+    """Flips the y-coordinates of the positions to align with the positive x-axis."""
+    flipped_positions = positions.copy()
+    flipped_positions[1, :] = -flipped_positions[1, :]  # invert the y-coordinates
+    flipped_positions[1, :] -= flipped_positions[1,4]  # translate to have base align with positive x 
+    return flipped_positions
+
+
+
+def normalise_minor(A : np.ndarray(shape=(2, 5)), Base : np.ndarray(shape=(2,1))) -> np.ndarray(shape=(2, 5)):
     """takes an array of positions and rotates them such that an inputted unit vector (base) would be parallel to the positive x-axis"""
     theta = theta_from_posx(Base)
+    theta = 2*math.pi - theta
     A_prime = rotate(A, theta)
     return A_prime
 
 def normalise_major(A):
     """takes a 3d array of positions of tracking dots and normalises them by aligning the G-YN line with the positive x-axis"""
-    raise NotImplementedError
+    shape = A.shape
+    L = shape[2]
+
+    in_set = datform.a_3d_slice(A, axis=2)
+    out_set = []
+
+    for n in range(L):
+        current = in_set[n]
+        G = current[:, -2:-1]
+        YN = current[:, -1:]
+        b_hat = origin_unit(G, YN)
+        rotated = normalise_minor(current, b_hat)
+        aligned = flip_and_align(rotated)
+        out_set.append(np.array(aligned))
+
+    out_array = datform.a_3d_recombine(out_set, axis=2)
+    return out_array
