@@ -1,6 +1,6 @@
 import math
 import numpy as np
-
+import data_formatter as datform
 
 
 def distance(A : np.ndarray(shape=(2,1)), B : np.ndarray(shape=(2,1))) -> float:
@@ -39,31 +39,25 @@ def theta_between(A : np.ndarray(shape=(2,1)), B : np.ndarray(shape=(2,1))) -> f
 
 def theta_from_posx(A : np.ndarray(shape=(2,1))) -> float:
     """Takes a 2x1 unit vector and returns the internal angle in radians from the positive x-axis"""
-    B = np.array([1, 0])
-    theta = theta_between(A, B)
+    theta = np.arctan2(A[1, 0], A[0, 0])
     return theta
 
 
 
-def rotate_cc(A : np.ndarray(shape=(2,1)), theta : float) -> np.ndarray(shape=(2,1)):
-    """Rotates a 2x1 vector about the origin counter-clockwise"""
-    rot_mat = np.array([[float(math.cos(theta)), float(math.sin(theta) * -1)], #cos(theta) , -sin(theta)
-                        [float(math.sin(theta)), float(math.cos(theta))]])     #sin(theta) ,  cos(theta)
-    A_prime = np.multiply(rot_mat, A)
+def rotate(A, theta : float) -> np.ndarray(shape=(2,1)):
+    """Rotates a 2d vector about the origin counter-clockwise"""
+    rot_mat = np.array([[np.cos(theta), -np.sin(theta)], #cos(theta) , -sin(theta)
+                        [np.sin(theta), np.cos(theta)]]) #sin(theta) ,  cos(theta)
+    A_prime = np.dot(rot_mat, A)
     return A_prime
 
 
-
-def rotate_cw(A : np.ndarray(shape=(2,1)), theta : float) -> np.ndarray(shape=(2,1)):
-    """Rotates a 2x1 vector about the origin clockwise"""
-    t = math.pi * 2
-    theta_new = t - theta
-    A_prime = rotate_cc(A, theta_new)
+def normalise_minor(A : np.ndarray(2, 5), Base : np.ndarray(2,1)) -> np.ndarray(2, 5):
+    """takes an array of positions and rotates them such that an inputted unit vector (base) would be parallel to the positive x-axis"""
+    theta = theta_from_posx(Base)
+    A_prime = rotate(A, theta)
     return A_prime
 
-
-
-def normalise(Set : np.ndarray(shape=(2, 5)), Base : np.ndarray(shape=(2, 1)), Axis : int) -> np.ndarray(2, 5):
-    """fuck"""
-    # I have to make this but it's going to be annoying
+def normalise_major(A):
+    """takes a 3d array of positions of tracking dots and normalises them by aligning the G-YN line with the positive x-axis"""
     raise NotImplementedError
