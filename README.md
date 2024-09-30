@@ -10,7 +10,7 @@ Original Build Date: 09.26.2024<br />
 
 ## Contributors
 
-Lead Contributor: Riese Marshall<br />
+Lead Contributor: RieseM204<br />
 Other Contributors: <br />
 
 ## Libraries
