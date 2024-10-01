@@ -4,6 +4,7 @@
 
 import numpy as np
 import pandas as pd
+from scipy.signal import savgol_filter
 
 #Section 1: reading from csvs to df and ndarray
 
@@ -112,3 +113,36 @@ def trial_to_3d(material : str, f_type : str, n : int):
         stacks_2d.append(np.array(trialdf_to_nda(df, color)))
     out = a_3d_stack(stacks_2d)
     return out
+
+# Other stuff
+
+def smooth_data(data, window_length=5, polyorder=2):
+    """Applies Savitzky-Golay filter to smooth data"""
+    if len(data) < window_length:
+        raise ValueError("Data length is less than window length.")
+    return savgol_filter(data, window_length, polyorder)
+
+
+
+def fdiff(x : list, y : list, use_smoothing = True):
+    """Applies finite difference to a data set"""
+    if len(x)!=len(y):
+        raise ValueError("unaligned sets for fdiff")
+    
+    if use_smoothing:
+        x_smooth = np.array(x)
+        y_smooth = smooth_data(np.array(y))
+    else:
+        x_smooth = np.array(x)
+        y_smooth = np.array(y)
+
+    x_prime = []
+    y_prime = []
+
+    for i in range (1, len(x_smooth)-1):
+        dx = x_smooth[i+1]-x_smooth[i-1]
+        dy = y_smooth[i+1]-y_smooth[i-1]
+        m = dy/dx
+        x_prime.append(float(x_smooth[i]))
+        y_prime.append(float(m))
+    return x_prime, y_prime

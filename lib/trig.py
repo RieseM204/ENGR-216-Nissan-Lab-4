@@ -55,7 +55,7 @@ def flip_and_align(positions : np.ndarray) -> np.ndarray:
     """Flips the y-coordinates of the positions to align with the positive x-axis."""
     flipped_positions = positions.copy()
     flipped_positions[1, :] = -flipped_positions[1, :]  # invert the y-coordinates
-    flipped_positions[1, :] -= flipped_positions[1,4]  # translate to have base align with positive x 
+    flipped_positions[1, :] -= flipped_positions[1,-1]  # translate to have base align with positive x 
     return flipped_positions
 
 
@@ -77,9 +77,9 @@ def normalise_major(A):
 
     for n in range(L):
         current = in_set[n]
-        G = current[:, -2:-1]
-        YN = current[:, -1:]
-        b_hat = origin_unit(G, YN)
+        U = current[:, -2:-1]
+        V = current[:, -1:]
+        b_hat = origin_unit(U, V)
         rotated = normalise_minor(current, b_hat)
         aligned = flip_and_align(rotated)
         out_set.append(np.array(aligned))
