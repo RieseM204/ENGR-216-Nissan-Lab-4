@@ -51,7 +51,7 @@ plt.plot(ts_list, v_list)
 plt.title("LO-DO v_x")
 plt.show()
 
-for n in range(1, 5):
+for n in range(1, 11):
     df = pd.read_csv(f"bin/friction_rubber_static_{n}.csv")
     df = df.dropna(axis='index', how='any')
     DO = np.array([df['position_px_x-darkorange'].tolist(), df['position_px_y-darkorange'].tolist()])
@@ -68,7 +68,8 @@ for n in range(1, 5):
         dx = DO_n_x[i]-O_n_x[i]
         dx_list.append(float(dx))
     ts_list, v_list = datform.fdiff(x = timestamp, y = dx_list, use_smoothing=True)
-    plt.plot(list(ts_list), list(v_list), label = str(n))
+    ats_list, a_list = datform.fdiff(x = ts_list, y = v_list, use_smoothing = True)
+    plt.plot(list(ats_list), list(a_list), label = str(n))
 plt.legend()
 plt.show()
 
