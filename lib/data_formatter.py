@@ -2,6 +2,7 @@
 #This whole library is just a bunch of numpy and pandas stuff to manipulate arrays
 # so that I don't have to write these a bunch later on
 
+import os
 import numpy as np
 import pandas as pd
 from scipy.signal import savgol_filter
@@ -105,14 +106,20 @@ def a_3d_recombine(A, axis = 2):
     
 #Section 4: putting the data together into a 3d array
 
-def trial_to_3d(material : str, f_type : str, n : int):
+def trial_to_3d(material : str, f_type : str, n : int, full : bool):
     """Takes in parameters for a given trial and returns a 3d matrix of the positions"""
     df = trial_to_df(material, f_type, n)
     stacks_2d = []
-    for color in color_list:
-        stacks_2d.append(np.array(trialdf_to_nda(df, color)))
-    out = a_3d_stack(stacks_2d)
-    return out
+    if full:
+        for color in color_list:
+            stacks_2d.append(np.array(trialdf_to_nda(df, color)))
+        out = a_3d_stack(stacks_2d)
+        return out
+    else:
+        for color in color_list[:3]:
+            stacks_2d.append(np.array(trialdf_to_nda(df, color)))
+        out = a_3d_stack(stacks_2d)
+        return out
 
 # Other stuff
 

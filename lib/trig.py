@@ -6,8 +6,7 @@ import lib.data_formatter as datform
 def distance(A : np.ndarray(shape=(2,1)), B : np.ndarray(shape=(2,1))) -> float:
     """Takes two ordered pairs and returns the distance between them"""
     C = np.subtract(A, B)
-    C_dot = np.dot(C, C)
-    r = math.sqrt(C_dot)
+    r = np.linalg.norm(C)
     return r
 
 def unit(v : np.ndarray(shape=(2,1))) -> np.ndarray(shape=(2,1)): 
@@ -86,3 +85,10 @@ def normalise_major(A):
 
     out_array = datform.a_3d_recombine(out_set, axis=2)
     return out_array
+
+def pythag_inf(A) -> float:
+    """takes a list of floats and returns the pythag of all of them"""
+    internal = 0
+    for i in A:
+        internal += float(i ** 2)
+    return math.sqrt(internal)

@@ -11,7 +11,28 @@ type_list = ['static', 'kinetic']
 color_list = ['darkorange', 'lightorange', 'hotpink', 'yellowneon', 'green']
 plot_color_list = ['darkorange', 'orange', 'pink', 'yellow', 'green']
 
-def v_by_angle(material : str, f_type : str, n : int):
+mass = 0.2241   # kg
+
+LO_HP = 0.178   # m
+G_YN = 0.217    # m
+
+A_r = 0.00378   # m^2
+A_w = 0.00364   # m^2
+
+def px_to_m(A) -> float:
+    """Takes in the data for a timestep and returns the number to multiply px distance by to get m distance"""
+    LO = A[:, 1].reshape(2, 1)
+    HP = A[:, 2].reshape(2, 1)
+    G = A[:, 3].reshape(2, 1)
+    YN = A[:, 4].reshape(2, 1)
+    distLOHP = trig.distance(LO, HP)
+    distGYN = trig.distance(G, YN)
+    factorLOHP = LO_HP / distLOHP
+    factorGYN = G_YN / distGYN
+    factor = (factorLOHP + factorGYN)/2
+    return factor
+
+def a_by_angle(material : str, f_type : str, n : int):
     df = pd.read_csv(f"bin/friction_{material}_{f_type}_{n}.csv")
     df = df.dropna(axis='index', how='any')
     DO = np.array([df['position_px_x-darkorange'].tolist(), df['position_px_y-darkorange'].tolist()])
@@ -26,6 +47,12 @@ def v_by_angle(material : str, f_type : str, n : int):
 
     full = datform.a_3d_stack([DO, O, HP, G ,YN])
     full_norm = trig.normalise_major(full)
+    full_norm_sliced = (datform.a_3d_slice(A=full_norm, axis=2))
+
+    factor_list = []
+    for j in full_norm_sliced:
+        factor_list.append(px_to_m(j))
+    factor_list = factor_list[1:-1]
 
     sample = np.array(datform.a_3d_slice(A=full_norm, axis=0)[0:3])
 
@@ -64,12 +91,18 @@ def v_by_angle(material : str, f_type : str, n : int):
         dx_list.append(float(dx))
         
     ts_list, v_list = datform.fdiff(x = timestamp, y = dx_list, use_smoothing = True)
-    tsa_list, a_list = datform.fdiff(x = ts_list, y = v_list, use_smoothing = True)
+
+    v_list_new = []
+    for j in range(len(v_list)):
+        factor = factor_list[j]
+        v_list_new.append(float(v_list[j]*factor))
+
+    tsa_list, a_list = datform.fdiff(x = ts_list, y = v_list_new, use_smoothing = True)
 
     plt.plot(theta_list[2:-2], a_list, label=n)
 
 for n in range(1,11):
-    v_by_angle("wood", "static", n)
+    a_by_angle("rubber", "static", n)
 
 plt.title("LO-DO a_x vs angle")
 plt.legend()

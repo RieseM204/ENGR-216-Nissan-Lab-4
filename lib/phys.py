@@ -9,7 +9,7 @@ import math
 
 def calc_fric_k(theta, a):
     g = 9.81
-    coeff = math.cot(theta) - (a)/(g * math.sin(theta))
+    coeff = math.tan(theta) - (a)/(g * math.cos(theta))
     return coeff
 
 def calc_fric_s(theta):
