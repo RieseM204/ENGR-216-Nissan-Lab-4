@@ -4,52 +4,72 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import lib.data_formatter as datform
 import lib.trig as trig
+from scipy.signal import savgol_filter
 
 mat_list = ['rubber', 'wood']
 type_list = ['static', 'kinetic']
 color_list = ['darkorange', 'lightorange', 'hotpink', 'yellowneon', 'green']
 plot_color_list = ['darkorange', 'orange', 'pink', 'yellow', 'green']
 
-def plot_sep(A : str, B : str, n : int):
-    df = pd.read_csv(f'bin/friction_{A}_{B}_{n}.csv')
-    for i in range(5):
-        pos_x = df[f'position_px_x-{color_list[i]}'].tolist()[3:]
-        pos_y = df[f'position_px_y-{color_list[i]}'].tolist()[3:]
-        plt.plot(pos_x, pos_y, label=i, color=plot_color_list[i])
-    plt.gca().invert_yaxis()
-    plt.title(f"{A} {B} {n}")
-    plt.show()
+df = pd.read_csv("bin/friction_rubber_static_3.csv")
+df = df.dropna(axis='index', how='any')
+DO = np.array([df['position_px_x-darkorange'].tolist(), df['position_px_y-darkorange'].tolist()])
+O = np.array([df['position_px_x-lightorange'].tolist(), df['position_px_y-lightorange'].tolist()])
+HP = np.array([df['position_px_x-hotpink'].tolist(), df['position_px_y-hotpink'].tolist()])
+G = np.array([df['position_px_x-green'].tolist(), df['position_px_y-green'].tolist()])
+YN = np.array([df['position_px_x-yellowneon'].tolist(), df['position_px_y-yellowneon'].tolist()])
 
+test_set = datform.a_3d_stack([DO, O, HP])
+test_set_norm = trig.normalise_major(test_set)
 
-plot_sep("rubber", "static", 2)
+#set_plot(test_set, "test")
+#set_plot(test_set_norm, "test normal")
 
-df = pd.read_csv(f'Data/friction_rubber_static_2.csv')
-A_1_x = df[f'position_px_x-lightorange'].tolist()[3:]
-A_1_y = df[f'position_px_y-lightorange'].tolist()[3:]
+timestamp = df['timestamp'].tolist()
 
-A_2_x = df[f'position_px_x-hotpink'].tolist()[3:]
-A_2_y = df[f'position_px_y-hotpink'].tolist()[3:]
+timestamp = [i/1000 for i in timestamp]
 
-B_1_x = df[f'position_px_x-green'].dropna(how="any").tolist()[3:]
-B_1_y = df[f'position_px_y-green'].dropna(how="any").tolist()[3:]
+DO_n = test_set_norm[0]
+DO_n_x = DO_n[0]
+O_n = test_set_norm[1]
+O_n_x = O_n[0]
 
-B_2_x = df[f'position_px_x-yellowneon'].dropna(how="any").tolist()[3:]
-B_2_y = df[f'position_px_y-yellowneon'].dropna(how="any").tolist()[3:]
+dx_list = []
 
-A_1 = np.array([[max(A_1_x)], [min(A_1_y)]])
-A_2 = np.array([[max(A_2_x)], [min(A_2_y)]])
+for n in range(len(DO_n_x)):
+    dx = DO_n_x[n]-O_n_x[n]
+    dx_list.append(float(dx))
 
-B_1 = np.array([[np.mean(B_1_x)],[np.mean(B_1_y)]])
-B_2 = np.array([[np.mean(B_2_x)],[np.mean(B_2_y)]])
+plt.plot(timestamp, dx_list)
+plt.title("LO-DO dx")
+plt.axhline(color='red', linestyle="--")
+plt.show()
+    
+ts_list, v_list = datform.fdiff(x = timestamp, y = dx_list, use_smoothing=True)
 
-print(B_1)
+plt.plot(ts_list, v_list)
+plt.title("LO-DO v_x")
+plt.show()
 
-A = trig.origin_unit(A_1, A_2)
-A_theta = trig.theta_from_posx(A)
-
-B = trig.origin_unit(B_1, B_2)
-B_theta = trig.theta_from_posx(B)
-
-print(B)
-print(B_theta)
+for n in range(1, 11):
+    df = pd.read_csv(f"bin/friction_rubber_static_{n}.csv")
+    df = df.dropna(axis='index', how='any')
+    DO = np.array([df['position_px_x-darkorange'].tolist(), df['position_px_y-darkorange'].tolist()])
+    O = np.array([df['position_px_x-lightorange'].tolist(), df['position_px_y-lightorange'].tolist()])
+    HP = np.array([df['position_px_x-hotpink'].tolist(), df['position_px_y-hotpink'].tolist()])
+    current_set = datform.a_3d_stack([DO, O, HP])
+    current_set_norm = trig.normalise_major(current_set)
+    timestamp = df['timestamp'].tolist()
+    timestamp = [i/1000 for i in timestamp]
+    DO_n_x = current_set_norm[0][0]
+    O_n_x = current_set_norm[1][0]
+    dx_list = []
+    for i in range(len(DO_n_x)):
+        dx = DO_n_x[i]-O_n_x[i]
+        dx_list.append(float(dx))
+    ts_list, v_list = datform.fdiff(x = timestamp, y = dx_list, use_smoothing=True)
+    ats_list, a_list = datform.fdiff(x = ts_list, y = v_list, use_smoothing = True)
+    plt.plot(list(ats_list), list(a_list), label = str(n))
+plt.legend()
+plt.show()
 
