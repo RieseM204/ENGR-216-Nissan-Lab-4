@@ -2,6 +2,12 @@
 
 Python project to process data for engineering lab
 
+## Aggie Honor Code
+
+The contributors to this project agree to the following:<br />
+"Aggies do not lie, chear, or steal, or tolerate those who do"<br />
+"I have not given or recieved any unauthorized aid on this assignment"<br />
+
 ## Build Info
 
 Build Version: 1.0<br />
@@ -12,6 +18,7 @@ Original Build Date: 09.26.2024<br />
 
 Lead Contributor: RieseM204<br />
 Other Contributors: <br />
+Note: All project contributors are members of team "Nissan"<br />
 
 ## Libraries
 
