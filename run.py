@@ -6,6 +6,7 @@ from scipy.signal import savgol_filter                                          
 import lib.data_formatter as datform                                                # Import my data formatting library
 import lib.trig as trig                                                             # Import my trigonometry library
 import lib.phys as phys                                                             # Import my physics equation library
+import matplotlib.pyplot as plt
 
 """Main file, intended to be run"""
 
@@ -39,6 +40,7 @@ def static(material : str):
     test_list = [i for i in os.listdir("bin/") if f"{material}_static" in i]        # Getting a list of all of the static trials for the given material
     length = len(test_list)                                                         # Getting the length of that list
     full_coeff_list = []                                                            # Setting up a list for all of the calculated coefficients
+    full_ang_list = []
     for i in range(1, length + 1):                                                  # Looping through all of the trials for that material and friction type
 
         full = datform.trial_to_3d(material, "static", i, True)                     # Converting trial data to a 3d array
@@ -106,10 +108,23 @@ def static(material : str):
 
         useful_ang_list = a_vs_ang[1, a_vs_ang[0] > thresh]                         # Use Boolean indexing to return only the angle with accelerations above the threshold
         useful_ang = min(useful_ang_list)                                           # Get the minimum angle at which the threshold is exceeded
+        full_ang_list.append(float(useful_ang))
         coeff = phys.calc_fric_s(useful_ang)                                        # Use that angle to get the coefficient
         full_coeff_list.append(float(coeff))                                        # Add that coefficient to the full list
+        plt.plot(theta_list, a_list, label=i)
     std = np.std(full_coeff_list)                                                   # Get the standard deviation of the coefficients
     mean_coeff = np.mean(full_coeff_list)                                           # Get the mean of the coefficients
+    mean_u_ang = np.mean(full_ang_list)
+    std_u_ang = np.std(full_ang_list)
+    plt.title(f"{material} static: acceleration vs angle")
+    plt.xlabel("Angle (Radians)")
+    plt.ylabel("Acceleration (m/s^2)")
+    plt.axvline(x = mean_u_ang, color = "black")
+    plt.axvline(x = mean_u_ang - std_u_ang, color = "black", linestyle = "--")
+    plt.axvline(x = mean_u_ang + std_u_ang, color = "black", linestyle = "--")
+    plt.axvspan(mean_u_ang - std_u_ang, mean_u_ang + std_u_ang, color='yellow', alpha=0.2)
+    plt.legend()
+    plt.show()
     return(mean_coeff, std)                                                         # Return the mean and the standard deviation
         
 
@@ -117,8 +132,7 @@ def kinetic(material : str):
     """Does all the kinetic friction stuff"""
     test_list = [i for i in os.listdir("bin/") if f"{material}_kinetic" in i]       # Everything here is the same as the static function until line 182
     length = len(test_list)
-    full_coeff_list = []
-    std_list =[]
+    super_coeff_list = []
     for i in range(1, length + 1):
 
         full = datform.trial_to_3d(material, "kinetic", i, True)
@@ -183,13 +197,21 @@ def kinetic(material : str):
         for j in range(len(a_list)):                                                # Iterate for the length of the acceleration list
             coeff_list.append(float(phys.calc_fric_k(theta_list[j], a_list[j])))    # Calculate the kinetic friction coefficient for each acceleration value and corresponding angle, and append to the coefficient list
         
+        super_coeff_list.extend(list(coeff_list))
         coeff = np.mean(coeff_list)                                                 # Find the mean of the coefficients
         coeff_std = np.std(coeff_list)                                              # Find the standard deviation of the coefficients
-        full_coeff_list.append(float(coeff))                                        # Append the mean to the FULL coefficient list
-        std_list.append(float(coeff_std))                                           # Append the standard deviation to the FULL std list
 
-    std = trig.pythag_inf(std_list)                                                 # Essentially apply a huge pythag theorem to all stds to get the propogated std
-    mean_coeff = np.mean(full_coeff_list)                                           # Get the mean coefficient out of all of the coefficients
+    std = np.std(super_coeff_list)                                                # Essentially apply a huge pythag theorem to all stds to get the propogated std
+    mean_coeff = np.mean(super_coeff_list)                                           # Get the mean coefficient out of all of the coefficients
+    plt.hist(super_coeff_list, bins = int(math.sqrt(len(super_coeff_list))))
+    plt.title(f"{material} kinetic: friction coefficients")
+    plt.ylabel("n")
+    plt.xlabel("coefficient of kinetic friction")
+    plt.axvline(x = mean_coeff, color = "black")
+    plt.axvline(x = mean_coeff - std, color = "black", linestyle = "--")
+    plt.axvline(x = mean_coeff + std, color = "black", linestyle = "--")
+    plt.axvspan(mean_coeff - std, mean_coeff + std, color='yellow', alpha=0.2)
+    plt.show()
     return(mean_coeff, std)                                                         # Return the mean coefficient and the standard deviation
 
 def main():
@@ -199,10 +221,15 @@ def main():
     r_s, r_s_s = static("rubber")                                                   # Calculate the static friction for rubber
     w_s, w_s_s = static("wood")                                                     # Calculate the static friction for wood
 
-    print(f"rubber kinetic: {r_k} +- {r_k_s}")                                      # Print the kinetic coefficient and std for rubber
-    print(f"wood kinetic: {w_k} +- {w_k_s}")                                        # Print the kinetic coefficient and std for wood
-    print(f"rubber static: {r_s} +- {r_s_s}")                                       # Print the static coefficient and std for rubber
-    print(f"wood static: {w_s} +- {w_s_s}")                                         # Print the static coefficient and std for wood
+    r_k_p = r_k_s / r_k * 100
+    w_k_p = w_k_s / w_k * 100
+    r_s_p = r_s_s / r_s * 100
+    w_s_p = w_s_s / w_s * 100
+
+    print(f"rubber kinetic: {r_k:.5f} ± {r_k_s:.5f} or {r_k_p:.2f}%")                                      # Print the kinetic coefficient and std for rubber
+    print(f"wood kinetic: {w_k:.5f} ± {w_k_s:.5f} or {w_k_p:.2f}%")                                        # Print the kinetic coefficient and std for wood
+    print(f"rubber static: {r_s:.5f} ± {r_s_s:.5f} or {r_s_p:.2f}%")                                       # Print the static coefficient and std for rubber
+    print(f"wood static: {w_s:.5f} ± {w_s_s:.5f} or {w_s_p:.2f}%")                                         # Print the static coefficient and std for wood
 
 
 if __name__ == "__main__":                                                          # Generic conditional to declare this as the functional script
