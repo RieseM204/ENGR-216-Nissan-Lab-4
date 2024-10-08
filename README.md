@@ -10,7 +10,7 @@ The contributors to this project agree to the following:<br />
 
 ## Build Info
 
-Build Version: 1.1<br />
+Build Version: 1.2<br />
 Build Date: 10.08.2024<br />
 Original Build Date: 09.26.2024<br />
 
