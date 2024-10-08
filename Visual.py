@@ -72,4 +72,3 @@ for n in range(1, 11):
     plt.plot(list(ats_list), list(a_list), label = str(n))
 plt.legend()
 plt.show()
-

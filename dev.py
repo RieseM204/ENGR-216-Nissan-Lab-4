@@ -104,6 +104,6 @@ def a_by_angle(material : str, f_type : str, n : int):
 for n in range(1,11):
     a_by_angle("rubber", "static", n)
 
-plt.title("LO-DO a_x vs angle")
+plt.title("Rubber Static Acceleration vs. Angle")
 plt.legend()
 plt.show()
