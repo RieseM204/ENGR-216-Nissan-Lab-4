@@ -14,13 +14,15 @@ import matplotlib.pyplot as plt
 
 #units are m, kg, s
 
-mass = 0.2241   # kg
+mass = 0.2241           # kg
 
-LO_HP = 0.178   # m
-G_YN = 0.217    # m
+LO_HP = 0.178           # m
+G_YN = 0.217            # m
 
-A_r = 0.00378   # m^2
-A_w = 0.00364   # m^2
+A_r = 0.00378           # m^2
+A_r_std = 0.71
+A_w = 0.00364           # m^2
+A_w_std = 0.71
 
 def px_to_m(A) -> float:
     """Takes in the data for a timestep and returns the number to multiply px distance by to get m distance"""
@@ -227,10 +229,13 @@ def main():
     w_s_p = w_s_s / w_s * 100
 
     print(f"rubber kinetic: {r_k:.5f} ± {r_k_s:.5f} or {r_k_p:.2f}%")                                      # Print the kinetic coefficient and std for rubber
+    print(f"rubber kinetic by area (m^2): {r_k / A_r:.5f}")
     print(f"wood kinetic: {w_k:.5f} ± {w_k_s:.5f} or {w_k_p:.2f}%")                                        # Print the kinetic coefficient and std for wood
+    print(f"wood kinetic by area (m^2): {w_k / A_w:.5f}")
     print(f"rubber static: {r_s:.5f} ± {r_s_s:.5f} or {r_s_p:.2f}%")                                       # Print the static coefficient and std for rubber
+    print(f"rubber static by area (m^2): {r_s / A_r:.5f}")
     print(f"wood static: {w_s:.5f} ± {w_s_s:.5f} or {w_s_p:.2f}%")                                         # Print the static coefficient and std for wood
-
+    print(f"wood static by area (m^2): {w_s / A_w:.5f}")
 
 if __name__ == "__main__":                                                          # Generic conditional to declare this as the functional script
     main()                                                                          # Do it all
