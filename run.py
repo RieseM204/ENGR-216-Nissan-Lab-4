@@ -20,9 +20,9 @@ LO_HP = 0.178           # m
 G_YN = 0.217            # m
 
 A_r = 0.00378           # m^2
-A_r_std = 0.71
+A_r_std = 0.00000071
 A_w = 0.00364           # m^2
-A_w_std = 0.71
+A_w_std = 0.00000071
 
 def px_to_m(A) -> float:
     """Takes in the data for a timestep and returns the number to multiply px distance by to get m distance"""
